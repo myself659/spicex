@@ -1,0 +1,83 @@
+[package]
+name = "spicex"
+version = "0.1.0"
+edition = "2021"
+authors = ["myself659@gmail.com"]
+description = "A complete configuration solution for Rust applications, inspired by Viper"
+license = "MIT 2.0"
+repository = "https://github.com/myself659/spicex"
+keywords = ["config", "configuration", "settings", "environment", "yaml"]
+categories = ["config", "parsing"]
+readme = "README.md"
+
+[dependencies]
+# Serialization and deserialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+toml = "0.8"
+
+# Error handling
+thiserror = "1.0"
+
+# File system watching
+notify = "6.0"
+
+# INI file parsing
+ini = "1.3"
+
+# Path and file utilities
+dirs = "5.0"
+
+# Optional command line parsing (for flag support)
+clap = { version = "4.0", features = ["derive"], optional = true }
+
+# Additional dependencies for examples
+num_cpus = { version = "1.0", optional = true }
+
+[dev-dependencies]
+tempfile = "3.0"
+proptest = "1.0"
+num_cpus = "1.0"
+
+[features]
+default = []
+cli = ["clap", "num_cpus"]
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "file_watching"
+path = "examples/file_watching.rs"
+
+[[example]]
+name = "struct_deserialization"
+path = "examples/struct_deserialization.rs"
+
+[[example]]
+name = "file_discovery_usage"
+path = "examples/file_discovery_usage.rs"
+
+[[example]]
+name = "cli_flag_usage"
+path = "examples/cli_flag_usage.rs"
+required-features = ["cli"]
+
+[[example]]
+name = "web_server_config"
+path = "examples/web_server_config.rs"
+
+[[example]]
+name = "microservice_config"
+path = "examples/microservice_config.rs"
+
+[[example]]
+name = "performance_benchmarks"
+path = "examples/performance_benchmarks.rs"
+
+[[example]]
+name = "cli_application"
+path = "examples/cli_application.rs"
+required-features = ["cli"]

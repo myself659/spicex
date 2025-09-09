@@ -1,0 +1,58 @@
+{
+  "name": "my-web-server",
+  "version": "1.2.0",
+  "environment": "production",
+  "debug": false,
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "workers": 8,
+    "ssl": {
+      "enabled": true,
+      "cert_file": "/etc/ssl/server.crt",
+      "key_file": "/etc/ssl/server.key"
+    },
+    "timeouts": {
+      "read": 60,
+      "write": 60,
+      "idle": 300
+    }
+  },
+  "database": {
+    "host": "db.example.com",
+    "port": 5432,
+    "database": "production_db",
+    "username": "app_user",
+    "password": "secure_password",
+    "max_connections": 200,
+    "connection_timeout": 30,
+    "ssl_mode": "require"
+  },
+  "logging": {
+    "level": "warn",
+    "format": "json",
+    "file": "/var/log/webserver.log",
+    "rotation": {
+      "enabled": true,
+      "max_size": "500MB",
+      "max_files": 30
+    }
+  },
+  "redis": {
+    "host": "redis.example.com",
+    "port": 6379,
+    "database": 0,
+    "pool_size": 20
+  },
+  "metrics": {
+    "enabled": true,
+    "port": 9090,
+    "path": "/metrics"
+  },
+  "features": {
+    "auth": true,
+    "rate_limiting": true,
+    "caching": true,
+    "analytics": false
+  }
+}
