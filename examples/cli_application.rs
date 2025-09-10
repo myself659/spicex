@@ -6,7 +6,7 @@
 
 use clap::{Arg, ArgMatches, Command};
 use serde::{Deserialize, Serialize};
-use spice::{ConfigValue, EnvConfigLayer, Spice};
+use spicex::{ConfigValue, EnvConfigLayer, Spice};
 use std::collections::HashMap;
 use std::env;
 use std::fs;

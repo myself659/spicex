@@ -250,10 +250,6 @@ impl FlagConfigLayer {
             return Some(ConfigValue::Integer(count as i64));
         }
 
-        // 5. Fallback: check if it's a flag that was set (for SetTrue actions without value)
-        if self.matches.get_flag(arg_name) {
-            return Some(ConfigValue::Boolean(true));
-        }
 
         None
     }

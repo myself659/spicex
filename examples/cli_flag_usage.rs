@@ -4,7 +4,7 @@
 //! and how they integrate with other configuration sources.
 
 use clap::{Arg, Command};
-use spice::{ConfigValue, Spice};
+use spicex::{ConfigValue, Spice};
 use std::collections::HashMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
