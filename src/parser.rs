@@ -16,7 +16,7 @@
 //! Parsers are automatically detected based on file extensions:
 //!
 //! ```rust
-//! use spice::parser::detect_parser_by_extension;
+//! use spicex::parser::detect_parser_by_extension;
 //!
 //! let json_parser = detect_parser_by_extension("json").unwrap();
 //! let yaml_parser = detect_parser_by_extension("yaml").unwrap();
@@ -29,7 +29,7 @@
 //! You can also use parsers directly:
 //!
 //! ```rust
-//! use spice::parser::{JsonParser, ConfigParser};
+//! use spicex::parser::{JsonParser, ConfigParser};
 //!
 //! let parser = JsonParser;
 //! let json_content = r#"{"database": {"host": "localhost", "port": 5432}}"#;
@@ -44,8 +44,8 @@
 //! All parsing operations return `ConfigResult<T>` which provides detailed error information:
 //!
 //! ```rust
-//! use spice::parser::{JsonParser, ConfigParser};
-//! use spice::error::ConfigError;
+//! use spicex::parser::{JsonParser, ConfigParser};
+//! use spicex::error::ConfigError;
 //!
 //! let parser = JsonParser;
 //! let invalid_json = r#"{"invalid": json}"#;
@@ -76,8 +76,8 @@ use std::collections::HashMap;
 /// # Example Implementation
 ///
 /// ```rust
-/// use spice::parser::ConfigParser;
-/// use spice::{ConfigValue, ConfigResult, ConfigError};
+/// use spicex::parser::ConfigParser;
+/// use spicex::{ConfigValue, ConfigResult, ConfigError};
 /// use std::collections::HashMap;
 ///
 /// struct CustomParser;
@@ -122,7 +122,7 @@ pub trait ConfigParser: Send + Sync {
     ///
     /// # Example
     /// ```rust
-    /// use spice::parser::{JsonParser, ConfigParser};
+    /// use spicex::parser::{JsonParser, ConfigParser};
     ///
     /// let parser = JsonParser;
     /// let json_content = r#"{"database": {"host": "localhost"}}"#;
@@ -148,8 +148,8 @@ pub trait ConfigParser: Send + Sync {
     ///
     /// # Example
     /// ```rust
-    /// use spice::parser::{JsonParser, ConfigParser};
-    /// use spice::ConfigValue;
+    /// use spicex::parser::{JsonParser, ConfigParser};
+    /// use spicex::ConfigValue;
     /// use std::collections::HashMap;
     ///
     /// let parser = JsonParser;
@@ -172,7 +172,7 @@ pub trait ConfigParser: Send + Sync {
     ///
     /// # Example
     /// ```rust
-    /// use spice::parser::{JsonParser, ConfigParser};
+    /// use spicex::parser::{JsonParser, ConfigParser};
     ///
     /// let parser = JsonParser;
     /// let extensions = parser.supported_extensions();
@@ -190,7 +190,7 @@ pub trait ConfigParser: Send + Sync {
     ///
     /// # Example
     /// ```rust
-    /// use spice::parser::{JsonParser, ConfigParser};
+    /// use spicex::parser::{JsonParser, ConfigParser};
     ///
     /// let parser = JsonParser;
     /// assert_eq!(parser.name(), "JSON");
@@ -220,7 +220,7 @@ pub trait ConfigParser: Send + Sync {
 ///
 /// # Example
 /// ```rust
-/// use spice::parser::detect_parser_by_extension;
+/// use spicex::parser::detect_parser_by_extension;
 ///
 /// // Get a JSON parser
 /// let json_parser = detect_parser_by_extension("json").unwrap();
@@ -266,7 +266,7 @@ pub fn detect_parser_by_extension(extension: &str) -> ConfigResult<Box<dyn Confi
 ///
 /// # Example
 /// ```rust
-/// use spice::parser::{JsonParser, ConfigParser};
+/// use spicex::parser::{JsonParser, ConfigParser};
 ///
 /// let parser = JsonParser;
 /// let json_content = r#"
@@ -340,7 +340,7 @@ impl ConfigParser for JsonParser {
 ///
 /// # Example
 /// ```rust
-/// use spice::parser::{YamlParser, ConfigParser};
+/// use spicex::parser::{YamlParser, ConfigParser};
 ///
 /// let parser = YamlParser;
 /// let yaml_content = r#"
@@ -425,7 +425,7 @@ impl ConfigParser for YamlParser {
 ///
 /// # Example
 /// ```rust
-/// use spice::parser::{TomlParser, ConfigParser};
+/// use spicex::parser::{TomlParser, ConfigParser};
 ///
 /// let parser = TomlParser;
 /// let toml_content = r#"
@@ -517,7 +517,7 @@ impl ConfigParser for TomlParser {
 ///
 /// # Example
 /// ```rust
-/// use spice::parser::{IniParser, ConfigParser};
+/// use spicex::parser::{IniParser, ConfigParser};
 ///
 /// let parser = IniParser;
 /// let ini_content = r#"

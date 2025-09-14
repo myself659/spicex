@@ -265,7 +265,7 @@ fn initialize_configuration() -> Result<AppConfig, Box<dyn std::error::Error>> {
     process_command_line_arguments(&mut spice_instance)?;
 
     // 6. Deserialize and validate configuration
-    let config = deserialize_and_validate_config(&spice_instance)?;
+    let config = deserialize_and_validate_config(&mut spice_instance)?;
 
     // 7. Set up file watching for hot reloading
     setup_file_watching(&mut spice_instance)?;
@@ -456,7 +456,7 @@ fn process_command_line_arguments(
 
 /// Deserializes and validates the configuration
 fn deserialize_and_validate_config(
-    spice_instance: &Spice,
+    spice_instance: &mut Spice,
 ) -> Result<AppConfig, Box<dyn std::error::Error>> {
     println!("  🔍 Deserializing and validating configuration...");
 
@@ -620,7 +620,7 @@ fn demonstrate_advanced_features() -> Result<(), Box<dyn std::error::Error>> {
     db_config.insert("ssl".to_string(), ConfigValue::from(true));
     spice_instance.set("database", ConfigValue::Object(db_config))?;
 
-    if let Some(db_viper) = spice_instance.sub("database")? {
+    if let Some(mut db_viper) = spice_instance.sub("database")? {
         let host = db_viper.get_string("host")?.unwrap_or_default();
         let port = db_viper.get_i64("port")?.unwrap_or(0);
         let ssl = db_viper.get_bool("ssl")?.unwrap_or(false);

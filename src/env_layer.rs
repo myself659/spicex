@@ -33,7 +33,7 @@ impl EnvConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::env_layer::EnvConfigLayer;
+    /// use spicex::env_layer::EnvConfigLayer;
     ///
     /// // Create layer with prefix "APP_"
     /// let env_layer = EnvConfigLayer::new(Some("APP".to_string()), true);
@@ -64,7 +64,7 @@ impl EnvConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::env_layer::EnvConfigLayer;
+    /// use spicex::env_layer::EnvConfigLayer;
     ///
     /// let mut env_layer = EnvConfigLayer::new(None, false);
     /// env_layer.set_key_replacer(Box::new(|key: &str| {
@@ -118,7 +118,7 @@ impl EnvConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::env_layer::EnvConfigLayer;
+    /// use spicex::env_layer::EnvConfigLayer;
     ///
     /// let env_layer = EnvConfigLayer::new(Some("APP".to_string()), false);
     /// let env_var = env_layer.transform_key("database.host");

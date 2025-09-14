@@ -27,7 +27,7 @@
 //! ## Quick Start
 //!
 //! ```rust
-//! use spice::{Spice, ConfigValue};
+//! use spicex::{Spice, ConfigValue};
 //! use std::collections::HashMap;
 //!
 //! // Create a new Spice instance
@@ -113,7 +113,7 @@
 //! ```rust
 //! # #[cfg(feature = "cli")]
 //! # {
-//! use spice::{Spice, FlagConfigLayer};
+//! use spicex::{Spice, FlagConfigLayer};
 //! use clap::{Arg, Command};
 //!
 //! let app = Command::new("myapp")
@@ -135,7 +135,7 @@
 //! Spice can watch configuration files for changes and automatically reload:
 //!
 //! ```rust,no_run
-//! use spice::Spice;
+//! use spicex::Spice;
 //!
 //! let mut viper = Spice::new();
 //! viper.set_config_file("./config.json").unwrap();
@@ -153,7 +153,7 @@
 //!
 //! ```rust
 //! use serde::Deserialize;
-//! use spice::{Spice, ConfigValue};
+//! use spicex::{Spice, ConfigValue};
 //!
 //! #[derive(Deserialize, Debug)]
 //! struct DatabaseConfig {
@@ -184,7 +184,7 @@
 //! The `ConfigError` enum provides detailed error information:
 //!
 //! ```rust
-//! use spice::{Spice, ConfigError};
+//! use spicex::{Spice, ConfigError};
 //!
 //! let mut viper = Spice::new();
 //! match viper.get_string("nonexistent.key") {

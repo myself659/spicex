@@ -254,7 +254,7 @@ features:
     );
 
     // Test sub-configuration functionality
-    let db_config = spice_instance.sub("database.primary").unwrap().unwrap();
+    let mut db_config = spice_instance.sub("database.primary").unwrap().unwrap();
     assert_eq!(
         db_config.get_string("host").unwrap(),
         Some("primary-db".to_string())
@@ -414,10 +414,10 @@ fn test_environment_variable_transformation() {
 #[test]
 fn test_configuration_merging_and_overrides() {
     // Clean up any existing environment variables that might interfere
-    env::remove_var("APP_DATABASE_HOST");
-    env::remove_var("APP_DATABASE_PORT");
-    env::remove_var("APP_APP_VERSION");
-    env::remove_var("APP_APP_DEBUG");
+    env::remove_var("MERGE_DATABASE_HOST");
+    env::remove_var("MERGE_DATABASE_PORT");
+    env::remove_var("MERGE_APP_VERSION");
+    env::remove_var("MERGE_APP_DEBUG");
 
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut env_guard = EnvVarGuard::new();
@@ -460,8 +460,8 @@ fn test_configuration_merging_and_overrides() {
     let override_path = create_temp_config_file(&temp_dir, "override.json", override_config);
 
     // Set environment variables
-    env_guard.set("APP_DATABASE_PORT", "3306");
-    env_guard.set("APP_APP_VERSION", "2.0.0");
+    env_guard.set("MERGE_DATABASE_PORT", "3306");
+    env_guard.set("MERGE_APP_VERSION", "2.0.0");
 
     let mut spice_instance = Spice::new();
 
@@ -480,7 +480,7 @@ fn test_configuration_merging_and_overrides() {
     spice_instance.load_config_file(&override_path).unwrap();
 
     // Add environment layer
-    let env_layer = EnvConfigLayer::new(Some("APP".to_string()), true);
+    let env_layer = EnvConfigLayer::new(Some("MERGE".to_string()), true);
     spice_instance.add_layer(Box::new(env_layer));
 
     // Test that values are properly merged and overridden

@@ -18,7 +18,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigLayer};
     ///
     /// let defaults = DefaultConfigLayer::new();
     /// assert_eq!(defaults.keys().len(), 0);
@@ -36,7 +36,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     /// use std::collections::HashMap;
     ///
     /// let mut defaults = HashMap::new();
@@ -57,7 +57,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     /// use std::collections::HashMap;
     ///
     /// let mut layer = DefaultConfigLayer::new();
@@ -79,7 +79,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     ///
     /// let mut layer = DefaultConfigLayer::new();
     /// layer.set("test", ConfigValue::from("value")).unwrap();
@@ -96,7 +96,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     ///
     /// let mut layer = DefaultConfigLayer::new();
     /// assert_eq!(layer.len(), 0);
@@ -112,7 +112,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::DefaultConfigLayer;
+    /// use spicex::DefaultConfigLayer;
     ///
     /// let layer = DefaultConfigLayer::new();
     /// assert!(layer.is_empty());
@@ -131,7 +131,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     ///
     /// let mut layer = DefaultConfigLayer::new();
     /// layer.set("database.host", ConfigValue::from("localhost")).unwrap();
@@ -153,7 +153,7 @@ impl DefaultConfigLayer {
     ///
     /// # Example
     /// ```
-    /// use spice::{DefaultConfigLayer, ConfigValue, ConfigLayer};
+    /// use spicex::{DefaultConfigLayer, ConfigValue, ConfigLayer};
     ///
     /// let mut layer = DefaultConfigLayer::new();
     /// layer.set("temp_key", ConfigValue::from("temp_value")).unwrap();

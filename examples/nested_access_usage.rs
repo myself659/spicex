@@ -92,7 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("4. Sub-configuration functionality:");
 
     // Create a sub-configuration for the server settings
-    if let Some(server_viper) = spice_instance.sub("app.server")? {
+    if let Some(mut server_viper) = spice_instance.sub("app.server")? {
         println!("   Server sub-configuration:");
         println!("     host = {:?}", server_viper.get_string("host")?);
         println!("     port = {:?}", server_viper.get_int("port")?);
@@ -104,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Create a sub-configuration for the database settings
-    if let Some(db_viper) = spice_instance.sub("app.database")? {
+    if let Some(mut db_viper) = spice_instance.sub("app.database")? {
         println!("   Database sub-configuration:");
         println!("     host = {:?}", db_viper.get_string("host")?);
         println!("     port = {:?}", db_viper.get_int("port")?);
@@ -117,7 +117,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a sub-configuration for the entire app, then create a nested sub-configuration
     if let Some(app_viper) = spice_instance.sub("app")? {
-        if let Some(server_viper) = app_viper.sub("server")? {
+        if let Some(mut server_viper) = app_viper.sub("server")? {
             println!("   Nested server sub-configuration:");
             println!("     host = {:?}", server_viper.get_string("host")?);
             println!("     port = {:?}", server_viper.get_int("port")?);

@@ -71,9 +71,9 @@ pub mod utils {
     ///
     /// # Example
     /// ```
-    /// use spice::layer::{ConfigLayer, LayerPriority, utils::sort_layers_by_priority};
-    /// use spice::value::ConfigValue;
-    /// use spice::error::ConfigResult;
+    /// use spicex::layer::{ConfigLayer, LayerPriority, utils::sort_layers_by_priority};
+    /// use spicex::value::ConfigValue;
+    /// use spicex::error::ConfigResult;
     /// use std::collections::HashMap;
     ///
     /// // Mock layer for example
@@ -112,9 +112,9 @@ pub mod utils {
     ///
     /// # Example
     /// ```
-    /// use spice::layer::{ConfigLayer, LayerPriority, utils::merge_value_from_layers};
-    /// use spice::value::ConfigValue;
-    /// use spice::error::ConfigResult;
+    /// use spicex::layer::{ConfigLayer, LayerPriority, utils::merge_value_from_layers};
+    /// use spicex::value::ConfigValue;
+    /// use spicex::error::ConfigResult;
     /// use std::collections::HashMap;
     ///
     /// // Mock layer for example
@@ -160,9 +160,9 @@ pub mod utils {
     ///
     /// # Example
     /// ```
-    /// use spice::layer::{ConfigLayer, LayerPriority, utils::collect_all_keys};
-    /// use spice::value::ConfigValue;
-    /// use spice::error::ConfigResult;
+    /// use spicex::layer::{ConfigLayer, LayerPriority, utils::collect_all_keys};
+    /// use spicex::value::ConfigValue;
+    /// use spicex::error::ConfigResult;
     /// use std::collections::HashMap;
     ///
     /// // Mock layer for example
@@ -209,9 +209,9 @@ pub mod utils {
     ///
     /// # Example
     /// ```
-    /// use spice::layer::{ConfigLayer, LayerPriority, utils::merge_all_layers};
-    /// use spice::value::ConfigValue;
-    /// use spice::error::ConfigResult;
+    /// use spicex::layer::{ConfigLayer, LayerPriority, utils::merge_all_layers};
+    /// use spicex::value::ConfigValue;
+    /// use spicex::error::ConfigResult;
     /// use std::collections::HashMap;
     ///
     /// // Mock layer for example

@@ -1,13 +1,13 @@
 //! Basic usage example for SPICE configuration library.
 
-use spicex::{ConfigValue, Spice};
+use spicex::Spice;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("SPICE - Basic Usage Example");
     println!("================================");
 
     // Create a new Spice instance
-    let mut spice_instance = Spice::new();
+    let _spice_instance = Spice::new();
 
     println!("✓ Created new Spice instance");
 

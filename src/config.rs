@@ -9,7 +9,7 @@ use crate::watcher::FileWatcher;
 use std::collections::HashMap;
 use std::env;
 use std::path::{Path, PathBuf};
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc};
 
 /// Represents a component of a configuration key path.
 #[derive(Debug, Clone, PartialEq)]
@@ -53,6 +53,12 @@ pub struct Spice {
 
     /// Flag to track if auto-reload callback is registered
     auto_reload_registered: bool,
+
+    /// Flag to indicate if configuration needs to be reloaded
+    needs_reload: Arc<std::sync::atomic::AtomicBool>,
+
+    /// User callbacks to trigger after successful configuration reload
+    user_callbacks: Vec<Box<dyn Fn() + Send + Sync>>,
 }
 
 impl Spice {
@@ -69,6 +75,8 @@ impl Spice {
             watched_config_files: Vec::new(),
             reload_receiver: None,
             auto_reload_registered: false,
+            needs_reload: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            user_callbacks: Vec::new(),
         }
     }
 
@@ -80,7 +88,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, FileConfigLayer};
+    /// use spicex::{Spice, FileConfigLayer};
     /// use std::path::PathBuf;
     ///
     /// let mut spice = Spice::new();
@@ -156,7 +164,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     /// use std::path::PathBuf;
     ///
     /// let mut spice = Spice::new();
@@ -248,7 +256,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -301,7 +309,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -343,7 +351,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -376,7 +384,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_file("./my-config.json").unwrap();
@@ -419,7 +427,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     /// use clap::{Arg, Command};
     ///
     /// let app = Command::new("myapp")
@@ -448,7 +456,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     /// use clap::{Arg, Command};
     /// use std::collections::HashMap;
     ///
@@ -489,7 +497,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::Spice;
+    /// use spicex::Spice;
     /// use clap::{Arg, Command};
     ///
     /// let app = Command::new("myapp")
@@ -551,7 +559,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     ///
     /// let spice = Spice::new();
     /// // After adding layers with configuration data
@@ -681,7 +689,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     ///
     /// let mut spice = Spice::new();
     /// spice.set("database.host", ConfigValue::from("localhost")).unwrap();
@@ -720,7 +728,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     ///
     /// let mut spice = Spice::new();
     /// spice.set_default("database.host", ConfigValue::from("localhost")).unwrap();
@@ -761,7 +769,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     /// use std::collections::HashMap;
     ///
     /// let mut spice = Spice::new();
@@ -809,7 +817,8 @@ impl Spice {
     ///
     /// # Returns
     /// * `ConfigResult<Option<String>>` - The string value if found and convertible
-    pub fn get_string(&self, key: &str) -> ConfigResult<Option<String>> {
+    pub fn get_string(&mut self, key: &str) -> ConfigResult<Option<String>> {
+        self.check_and_reload()?;
         match self.get(key)? {
             Some(value) => Ok(Some(value.coerce_to_string())),
             None => Ok(None),
@@ -823,7 +832,8 @@ impl Spice {
     ///
     /// # Returns
     /// * `ConfigResult<Option<i64>>` - The integer value if found and convertible
-    pub fn get_int(&self, key: &str) -> ConfigResult<Option<i64>> {
+    pub fn get_int(&mut self, key: &str) -> ConfigResult<Option<i64>> {
+        self.check_and_reload()?;
         match self.get(key)? {
             Some(value) => match value.as_i64() {
                 Some(i) => Ok(Some(i)),
@@ -840,7 +850,7 @@ impl Spice {
     ///
     /// # Returns
     /// * `ConfigResult<Option<i64>>` - The i64 value if found and convertible
-    pub fn get_i64(&self, key: &str) -> ConfigResult<Option<i64>> {
+    pub fn get_i64(&mut self, key: &str) -> ConfigResult<Option<i64>> {
         self.get_int(key)
     }
 
@@ -851,7 +861,7 @@ impl Spice {
     ///
     /// # Returns
     /// * `ConfigResult<Option<i32>>` - The i32 value if found and convertible
-    pub fn get_i32(&self, key: &str) -> ConfigResult<Option<i32>> {
+    pub fn get_i32(&mut self, key: &str) -> ConfigResult<Option<i32>> {
         match self.get_int(key)? {
             Some(i) => {
                 if i >= i32::MIN as i64 && i <= i32::MAX as i64 {
@@ -919,7 +929,8 @@ impl Spice {
     ///
     /// # Returns
     /// * `ConfigResult<Option<bool>>` - The boolean value if found and convertible
-    pub fn get_bool(&self, key: &str) -> ConfigResult<Option<bool>> {
+    pub fn get_bool(&mut self, key: &str) -> ConfigResult<Option<bool>> {
+        self.check_and_reload()?;
         match self.get(key)? {
             Some(value) => match value.coerce_to_bool() {
                 Some(b) => Ok(Some(b)),
@@ -1002,8 +1013,17 @@ impl Spice {
     ) -> HashMap<String, ConfigValue> {
         let mut result = HashMap::new();
 
-        for (key, value) in flat_settings {
-            self.insert_nested_value(&mut result, &key, value);
+        // Sort keys by length (ascending) and then alphabetically
+        // This ensures shorter (less specific) keys are processed first,
+        // allowing longer (more specific) keys to overwrite them
+        let mut sorted_keys: Vec<_> = flat_settings.keys().collect();
+        sorted_keys.sort_by(|a, b| {
+            a.len().cmp(&b.len()).then(a.cmp(b))
+        });
+
+        for key in sorted_keys {
+            let value = flat_settings.get(key).unwrap();
+            self.insert_nested_value(&mut result, key, value.clone());
         }
 
         result
@@ -1047,7 +1067,7 @@ impl Spice {
         let part = parts[index];
 
         if index == parts.len() - 1 {
-            // Last part, insert the value
+            // Last part, insert the value (always overwrite)
             current.insert(part.to_string(), value);
         } else {
             // Intermediate part, ensure we have an object
@@ -1150,7 +1170,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set("app.name", "my-app".into()).unwrap();
@@ -1232,7 +1252,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set("app.name", "my-app".into()).unwrap();
@@ -1309,7 +1329,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set("app.name", "my-app".into()).unwrap();
@@ -1346,7 +1366,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     /// use std::collections::HashMap;
     ///
     /// let mut spice = Spice::new();
@@ -1399,7 +1419,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     /// use serde::Deserialize;
     /// use std::collections::HashMap;
     ///
@@ -1459,7 +1479,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue};
+    /// use spicex::{Spice, ConfigValue};
     /// use serde::Deserialize;
     /// use std::collections::HashMap;
     ///
@@ -1511,7 +1531,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue, ConfigError};
+    /// use spicex::{Spice, ConfigValue, ConfigError};
     /// use serde::Deserialize;
     ///
     /// #[derive(Deserialize, Debug, PartialEq)]
@@ -1565,7 +1585,7 @@ impl Spice {
     ///
     /// # Example
     /// ```
-    /// use spice::{Spice, ConfigValue, ConfigError};
+    /// use spicex::{Spice, ConfigValue, ConfigError};
     /// use serde::Deserialize;
     /// use std::collections::HashMap;
     ///
@@ -1616,7 +1636,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -1681,7 +1701,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     /// use std::sync::{Arc, Mutex};
     ///
     /// let mut spice = Spice::new();
@@ -1711,10 +1731,8 @@ impl Spice {
         // First register the automatic reload callback
         self.register_auto_reload_callback()?;
 
-        // Then register the user's callback
-        if let Some(watcher) = &mut self.watcher {
-            watcher.on_config_change(callback)?;
-        }
+        // Store the user's callback to be triggered only after successful reloads
+        self.user_callbacks.push(Box::new(callback));
 
         Ok(())
     }
@@ -1727,15 +1745,13 @@ impl Spice {
             return Ok(()); // Already registered
         }
 
-        // Create a channel for reload signals
-        let (reload_sender, reload_receiver) = mpsc::channel();
-        self.reload_receiver = Some(reload_receiver);
+        // Clone the needs_reload flag for the callback
+        let needs_reload = Arc::clone(&self.needs_reload);
 
-        // Register a callback that sends reload signals
+        // Register a callback that sets the reload flag but doesn't trigger user callbacks yet
         if let Some(watcher) = &mut self.watcher {
             watcher.on_config_change(move || {
-                // Send reload signal (ignore errors if receiver is dropped)
-                let _ = reload_sender.send(());
+                needs_reload.store(true, std::sync::atomic::Ordering::SeqCst);
             })?;
         }
 
@@ -1743,12 +1759,70 @@ impl Spice {
         Ok(())
     }
 
+    /// Checks if configuration needs to be reloaded and performs the reload if necessary.
+    /// Returns true if a reload was actually performed, false otherwise.
+    fn check_and_reload(&mut self) -> ConfigResult<bool> {
+        if self.needs_reload.load(std::sync::atomic::Ordering::SeqCst) {
+            // Try to reload, but first check if all files are still valid
+            let reload_successful = self.try_reload_if_valid()?;
+            if reload_successful {
+                // Reset the reload flag only if reload was successful
+                self.needs_reload.store(false, std::sync::atomic::Ordering::SeqCst);
+
+                // Trigger all user callbacks after successful reload
+                for callback in &self.user_callbacks {
+                    callback();
+                }
+
+                return Ok(true);
+            } else {
+                // If reload failed (due to invalid files), reset flag but don't reload
+                self.needs_reload.store(false, std::sync::atomic::Ordering::SeqCst);
+                return Ok(false);
+            }
+        }
+        Ok(false)
+    }
+
+    /// Attempts to reload configuration only if all watched files are valid.
+    /// Returns true if reload was successful, false if any file was invalid.
+    fn try_reload_if_valid(&mut self) -> ConfigResult<bool> {
+        if self.watched_config_files.is_empty() {
+            return Ok(false);
+        }
+
+        // First, validate all files can be parsed
+        let mut new_file_layers = Vec::new();
+        for config_file in &self.watched_config_files {
+            match FileConfigLayer::new(config_file) {
+                Ok(file_layer) => new_file_layers.push(file_layer),
+                Err(_) => {
+                    // If any file is invalid, don't reload
+                    return Ok(false);
+                }
+            }
+        }
+
+        // Only if all files are valid, proceed with the reload
+        // Remove existing file layers
+        self.layers.retain(|layer| {
+            layer.as_any().downcast_ref::<FileConfigLayer>().is_none()
+        });
+
+        // Add the new valid file layers
+        for file_layer in new_file_layers {
+            self.add_layer(Box::new(file_layer));
+        }
+
+        Ok(true)
+    }
+
     /// Stops watching configuration files for changes.
     /// This method disables automatic reloading and stops the file watching background thread.
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -1772,7 +1846,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// assert!(!spice.is_watching());
@@ -1793,7 +1867,7 @@ impl Spice {
     ///
     /// # Example
     /// ```no_run
-    /// use spice::Spice;
+    /// use spicex::Spice;
     ///
     /// let mut spice = Spice::new();
     /// spice.set_config_name("config");
@@ -3282,7 +3356,7 @@ mod tests {
 
     #[test]
     fn test_write_config_round_trip() {
-        use std::fs;
+
         use tempfile::TempDir;
 
         let temp_dir = TempDir::new().unwrap();
@@ -3585,7 +3659,7 @@ mod tests {
         // Create sub-configuration
         let sub_viper = spice.sub("database").unwrap();
         assert!(sub_viper.is_some());
-        let sub_viper = sub_viper.unwrap();
+        let mut sub_viper = sub_viper.unwrap();
 
         // Test direct access in sub-configuration
         let host = sub_viper.get_string("host").unwrap();
@@ -3649,7 +3723,7 @@ mod tests {
         let app_viper = spice.sub("app").unwrap().unwrap();
 
         // Create nested sub-configuration for server
-        let server_viper = app_viper.sub("server").unwrap().unwrap();
+        let mut server_viper = app_viper.sub("server").unwrap().unwrap();
 
         // Test access in nested sub-configuration
         let host = server_viper.get_string("host").unwrap();
@@ -4419,6 +4493,12 @@ mod tests {
         // Give some time for the file watcher to detect the change
         thread::sleep(Duration::from_millis(100));
 
+        // Access configuration to trigger reload and callback
+        assert_eq!(
+            spice.get_string("key").unwrap(),
+            Some("updated_value".to_string())
+        );
+
         // Check that callback was called
         let final_count = *change_count.lock().unwrap();
         assert!(
@@ -4477,10 +4557,12 @@ mod tests {
             })
             .unwrap();
 
-        // Manually trigger callbacks for testing
-        if let Some(watcher) = &spice.watcher {
-            watcher.trigger_callbacks_for_test();
-        }
+        // Write some configuration to trigger callbacks
+        fs::write(&config_path, r#"{"test": "value"}"#).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
+        // Access configuration to trigger reload and callbacks
+        let _ = spice.get_string("test").unwrap();
 
         // Both callbacks should have been called
         assert!(*callback1_called.lock().unwrap());
@@ -4754,8 +4836,8 @@ mod tests {
 
     #[test]
     fn test_write_config_file_permission_error_enhanced() {
-        use std::fs;
-        use tempfile::TempDir;
+
+
 
         // Only run on Unix systems where we can control permissions
         #[cfg(unix)]

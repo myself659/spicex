@@ -343,7 +343,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     validate_configuration(&config)?;
 
     // Show environment-specific overrides
-    demonstrate_environment_overrides(&spice_instance)?;
+    demonstrate_environment_overrides(&mut spice_instance)?;
 
     // Demonstrate feature flag usage
     demonstrate_feature_flags(&config);
@@ -600,7 +600,7 @@ fn validate_configuration(config: &MicroserviceConfig) -> Result<(), Box<dyn std
 }
 
 fn demonstrate_environment_overrides(
-    spice_instance: &Spice,
+    spice_instance: &mut Spice,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n🌍 Environment Override Examples:");
     println!("=================================");

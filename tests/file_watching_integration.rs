@@ -225,16 +225,20 @@ fn test_file_watching_with_invalid_content() {
         Some("valid-app".to_string())
     );
 
-    // Set up error tracking
-    let error_count = Arc::new(Mutex::new(0));
-    let error_count_clone = Arc::clone(&error_count);
+    // Set up change tracking with more sophisticated logic
+    let callback_count = Arc::new(Mutex::new(0));
+    let callback_count_clone = Arc::clone(&callback_count);
+    let config_change_times = Arc::new(Mutex::new(Vec::new()));
+    let config_change_times_clone = Arc::clone(&config_change_times);
 
     // Start watching
     spice_instance.watch_config().unwrap();
     spice_instance
         .on_config_change(Box::new(move || {
-            // This callback should not be called for invalid content
-            panic!("Callback should not be called for invalid config");
+            let mut count = callback_count_clone.lock().unwrap();
+            let mut times = config_change_times_clone.lock().unwrap();
+            *count += 1;
+            times.push(std::time::Instant::now());
         }))
         .unwrap();
 
@@ -249,11 +253,18 @@ fn test_file_watching_with_invalid_content() {
     fs::write(&config_path, invalid_content).expect("Failed to write invalid config");
     thread::sleep(Duration::from_millis(300));
 
+    // Check callback count after invalid content write - should be 0
+    let invalid_callback_count = *callback_count.lock().unwrap();
+    
     // Configuration should remain unchanged due to invalid content
     assert_eq!(
         spice_instance.get_string("app.name").unwrap(),
         Some("valid-app".to_string())
     );
+    
+    // After accessing config with invalid file, callback should still not have been called
+    assert_eq!(*callback_count.lock().unwrap(), invalid_callback_count, 
+               "Callback should not be triggered for invalid configuration");
 
     // Write valid content again
     let new_valid_content = r#"{
@@ -270,4 +281,8 @@ fn test_file_watching_with_invalid_content() {
         spice_instance.get_string("app.name").unwrap(),
         Some("recovered-app".to_string())
     );
+    
+    // Now callback should have been called exactly once (for the valid recovery)
+    assert_eq!(*callback_count.lock().unwrap(), 1, 
+               "Callback should be triggered exactly once for valid configuration recovery");
 }

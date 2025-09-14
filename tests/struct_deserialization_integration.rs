@@ -223,7 +223,7 @@ fn test_struct_deserialization_with_multiple_sources() {
         .set("features", ConfigValue::Object(features))
         .unwrap();
 
-    // Test deserialization with merged sources
+    // Test deserialization with merged sources  
     let app_config: AppConfig = spice_instance.unmarshal().unwrap();
 
     assert_eq!(app_config.name, "multi-source-app"); // from file
@@ -231,10 +231,10 @@ fn test_struct_deserialization_with_multiple_sources() {
     assert_eq!(app_config.debug, true); // explicit override
 
     // Database config from multiple sources
-    assert_eq!(app_config.database.host, "prod-db"); // explicit override (highest precedence)
+    assert_eq!(app_config.database.host, "prod-db"); // explicit override works correctly
     assert_eq!(app_config.database.port, 5432); // from file
-    assert_eq!(app_config.database.ssl, true); // from default
-    assert_eq!(app_config.database.timeout, 60); // from default
+    assert_eq!(app_config.database.ssl, true); // from SpiceX default
+    assert_eq!(app_config.database.timeout, 60); // from SpiceX default (overrides serde default)
 
     // Servers from file
     assert_eq!(app_config.servers.len(), 1);

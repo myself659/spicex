@@ -245,7 +245,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     display_configuration(&config);
 
     // 7. Demonstrate accessing individual configuration values
-    demonstrate_individual_access(&spice_instance)?;
+    demonstrate_individual_access(&mut spice_instance)?;
 
     // 8. Show configuration watching (if files are available)
     demonstrate_config_watching(&mut spice_instance)?;
@@ -449,7 +449,7 @@ fn display_configuration(config: &AppConfig) {
     }
 }
 
-fn demonstrate_individual_access(spice_instance: &Spice) -> Result<(), Box<dyn std::error::Error>> {
+fn demonstrate_individual_access(spice_instance: &mut Spice) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n🔍 Demonstrating individual configuration access:");
     println!("================================================");
 
