@@ -56,6 +56,24 @@ impl EnvConfigLayer {
         layer
     }
 
+    /// Updates the environment prefix and refreshes the cache when automatic mode is enabled.
+    pub fn set_prefix(&mut self, prefix: Option<String>) {
+        self.prefix = prefix;
+        if self.automatic {
+            self.refresh_cache();
+        }
+    }
+
+    /// Enables or disables automatic environment discovery and refreshes the cache.
+    pub fn set_automatic(&mut self, automatic: bool) {
+        self.automatic = automatic;
+        if automatic {
+            self.refresh_cache();
+        } else {
+            self.cached_vars.clear();
+        }
+    }
+
     /// Sets a custom key replacement function for transforming configuration keys
     /// to environment variable names.
     ///
@@ -83,10 +101,13 @@ impl EnvConfigLayer {
     pub fn refresh_cache(&mut self) {
         self.cached_vars.clear();
 
+        if !self.automatic {
+            return;
+        }
+
         for (key, value) in env::vars() {
             if let Some(ref prefix) = self.prefix {
                 if key.starts_with(&format!("{prefix}_")) {
-                    // Remove prefix and convert to config key format
                     let config_key = key
                         .strip_prefix(&format!("{prefix}_"))
                         .unwrap()
@@ -94,8 +115,7 @@ impl EnvConfigLayer {
                         .replace("_", ".");
                     self.cached_vars.insert(config_key, value);
                 }
-            } else if self.automatic {
-                // Convert all env vars to config key format
+            } else {
                 let config_key = key.to_lowercase().replace("_", ".");
                 self.cached_vars.insert(config_key, value);
             }
@@ -427,8 +447,7 @@ mod tests {
         env::set_var("REFRESH_TEST_KEY", "test_value");
 
         // Enable automatic mode and refresh cache
-        env_layer.automatic = true;
-        env_layer.refresh_cache();
+        env_layer.set_automatic(true);
 
         // Should now have the cached variable
         let keys = env_layer.keys();
